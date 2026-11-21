@@ -1,5 +1,16 @@
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
-local Window = WindUI:CreateWindow({-- [เริ่มส่วนหน้าต่างลอยรูปเกล็ดหิมะสำหรับเปิด/ปิด UI]
+local Window = WindUI:CreateWindow({
+    Title = "BLXCKGOD HUB",
+    Icon = "snowflake",
+    Author = "Mahanakhon Racing",
+    Folder = "BLXCKGOD HUB",
+    Size = UDim2.fromOffset(580, 460),
+    Transparent = true,
+    Theme = "Dark",
+})
+Window:SetToggleKey(Enum.KeyCode.RightControl)
+
+-- [เริ่มส่วนหน้าต่างลอยรูปเกล็ดหิมะสำหรับเปิด/ปิด UI]
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
@@ -138,13 +149,6 @@ end
 
 CreateFloatingSnowflake()
 -- [จบส่วนหน้าต่างลอยรูปเกล็ดหิมะ]
-    Title = "BLXCKGOD HUB",
-    Icon = "snowflake",
-    Author = "Mahanakhon Racing",
-    Folder = "BLXCKGOD HUB",
-    Size = UDim2.fromOffset(580, 460),
-    Transparent = true,
-    Theme = "Dark",
 })
 Window:SetToggleKey(Enum.KeyCode.RightControl)
 
