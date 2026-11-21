@@ -149,7 +149,6 @@ end
 
 CreateFloatingSnowflake()
 -- [จบส่วนหน้าต่างลอยรูปเกล็ดหิมะ]
-})
 Window:SetToggleKey(Enum.KeyCode.RightControl)
 
 local Webhook = ""
