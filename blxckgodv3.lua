@@ -1,5 +1,144 @@
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
-local Window = WindUI:CreateWindow({
+local Window = WindUI:CreateWindow({-- [เริ่มส่วนหน้าต่างลอยรูปเกล็ดหิมะสำหรับเปิด/ปิด UI]
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local CoreGui = game:GetService("CoreGui")
+
+local function GetParentGui()
+	local ok, res = pcall(function()
+		return CoreGui
+	end)
+	if ok and res then
+		return res
+	end
+	local lp = Players.LocalPlayer
+	return lp and lp:WaitForChild("PlayerGui")
+end
+
+local function ToggleMainUI()
+	local toggled = false
+	if type(Window) == "table" then
+		for _, fnName in ipairs({ "Toggle", "ToggleVisibility", "Minimize", "Close" }) do
+			if type(Window[fnName]) == "function" then
+				local ok = pcall(function()
+					Window[fnName](Window)
+				end)
+				if ok then
+					toggled = true
+					break
+				end
+			end
+		end
+	end
+
+	if not toggled then
+		local parentGui = GetParentGui()
+		if parentGui then
+			for _, gui in ipairs(parentGui:GetChildren()) do
+				if gui:IsA("ScreenGui") and gui.Name ~= "BLXCKGOD_FloatingBtn" then
+					if tostring(gui.Name):lower():find("wind") or gui:FindFirstChildWhichIsA("Frame", true) then
+						gui.Enabled = not gui.Enabled
+					end
+				end
+			end
+		end
+	end
+end
+
+local function CreateFloatingSnowflake()
+	local parentGui = GetParentGui()
+	if not parentGui then return end
+
+	local old = parentGui:FindFirstChild("BLXCKGOD_FloatingBtn")
+	if old then old:Destroy() end
+
+	local screenGui = Instance.new("ScreenGui")
+	screenGui.Name = "BLXCKGOD_FloatingBtn"
+	screenGui.ResetOnSpawn = false
+	screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	pcall(function()
+		screenGui.Parent = parentGui
+	end)
+	if not screenGui.Parent then
+		screenGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+	end
+
+	local btn = Instance.new("TextButton")
+	btn.Name = "SnowflakeToggle"
+	btn.Size = UDim2.fromOffset(48, 48)
+	btn.Position = UDim2.new(0.06, 0, 0.25, 0)
+	btn.BackgroundColor3 = Color3.fromRGB(18, 18, 26)
+	btn.BackgroundTransparency = 0.08
+	btn.BorderSizePixel = 0
+	btn.Text = "❄️"
+	btn.TextSize = 24
+	btn.TextColor3 = Color3.fromRGB(220, 240, 255)
+	btn.Font = Enum.Font.GothamBold
+	btn.AutoButtonColor = true
+	btn.Parent = screenGui
+
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 12)
+	corner.Parent = btn
+
+	local stroke = Instance.new("UIStroke")
+	stroke.Color = Color3.fromRGB(130, 170, 255)
+	stroke.Thickness = 1.4
+	stroke.Transparency = 0.35
+	stroke.Parent = btn
+
+	local dragging = false
+	local dragInput = nil
+	local dragStart = nil
+	local startPos = nil
+	local moved = false
+
+	btn.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			moved = false
+			dragStart = input.Position
+			startPos = btn.Position
+
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					dragging = false
+				end
+			end)
+		end
+	end)
+
+	btn.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+			dragInput = input
+		end
+	end)
+
+	UserInputService.InputChanged:Connect(function(input)
+		if input == dragInput and dragging and dragStart and startPos then
+			local delta = input.Position - dragStart
+			if delta.Magnitude > 6 then
+				moved = true
+			end
+			btn.Position = UDim2.new(
+				startPos.X.Scale,
+				startPos.X.Offset + delta.X,
+				startPos.Y.Scale,
+				startPos.Y.Offset + delta.Y
+			)
+		end
+	end)
+
+	btn.MouseButton1Click:Connect(function()
+		if not moved then
+			ToggleMainUI()
+		end
+	end)
+end
+
+CreateFloatingSnowflake()
+-- [จบส่วนหน้าต่างลอยรูปเกล็ดหิมะ]
+    }
     Title = "BLXCKGOD HUB",
     Icon = "snowflake",
     Author = "Mahanakhon Racing",
