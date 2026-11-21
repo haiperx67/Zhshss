@@ -138,7 +138,6 @@ end
 
 CreateFloatingSnowflake()
 -- [จบส่วนหน้าต่างลอยรูปเกล็ดหิมะ]
-    }
     Title = "BLXCKGOD HUB",
     Icon = "snowflake",
     Author = "Mahanakhon Racing",
