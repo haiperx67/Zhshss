@@ -3,7 +3,7 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
 -- ใส่ลิงก์ API ของบอทคุณตรงนี้
-local API_URL = "http://ใส่_IP_หรือโดเมนบอทของคุณ:3000/verify"
+local API_URL = "http://78.154.103.36:14120/verify"
 
 local HttpRequest =
     (syn and syn.request)
