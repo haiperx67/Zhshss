@@ -1,15 +1,41 @@
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
+local StarterGui = game:GetService("StarterGui")
 local LocalPlayer = Players.LocalPlayer
 
--- ใส่ลิงก์ API ของบอทคุณตรงนี้
 local API_URL = "http://78.154.103.36:14120/verify"
+
+local function Notify(title, text)
+    pcall(function()
+        StarterGui:SetCore("SendNotification", {
+            Title = title,
+            Text = text,
+            Duration = 5
+        })
+    end)
+end
+
+-- 1. บังคับเช็กคีย์ก่อนเลย ถ้าไม่ใส่คีย์ให้หยุดทันที
+local rawKey = getgenv().BLXCKGOD_KEY
+local userKey = (type(rawKey) == "string") and rawKey:gsub("%s+", ""):upper() or ""
+
+if userKey == "" then
+    warn('[BLXCKGOD HUB] ไม่พบคีย์! กรุณาใส่ getgenv().BLXCKGOD_KEY = "คีย์ของคุณ" ก่อนรัน')
+    Notify("BLXCKGOD HUB", "ไม่พบคีย์! กรุณาใส่คีย์ก่อนรันสคริปต์")
+    return
+end
 
 local HttpRequest =
     (syn and syn.request)
     or (http and http.request)
     or (typeof(request) == "function" and request)
     or (typeof(http_request) == "function" and http_request)
+
+if not HttpRequest then
+    warn("[BLXCKGOD HUB] Executor ของคุณไม่รองรับ HTTP Request")
+    Notify("BLXCKGOD HUB", "Executor ไม่รองรับ HTTP Request")
+    return
+end
 
 local function GetHWID()
     local ok, id = pcall(function()
@@ -18,20 +44,7 @@ local function GetHWID()
         end
         return game:GetService("RbxAnalyticsService"):GetClientId()
     end)
-    return ok and tostring(id) or tostring(LocalPlayer.UserId)
-end
-
--- อ่านคีย์จาก getgenv().BLXCKGOD_KEY ที่ลูกค้าใส่มาตอนรัน
-local userKey = tostring(getgenv().BLXCKGOD_KEY or ""):gsub("%s+", ""):upper()
-
-if userKey == "" then
-    warn("[BLXCKGOD HUB] ไม่พบคีย์! กรุณาใส่ getgenv().BLXCKGOD_KEY = \"คีย์ของคุณ\" ก่อนรัน")
-    return
-end
-
-if not HttpRequest then
-    warn("[BLXCKGOD HUB] Executor ของคุณไม่รองรับ HTTP Request")
-    return
+    return (ok and id and tostring(id) ~= "") and tostring(id) or tostring(LocalPlayer.UserId)
 end
 
 local url = string.format(
@@ -47,7 +60,8 @@ local ok, response = pcall(function()
 end)
 
 if not ok or not response or not response.Body then
-    warn("[BLXCKGOD HUB] ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์เช็กคีย์ได้")
+    warn("[BLXCKGOD HUB] เชื่อมต่อเซิร์ฟเวอร์เช็กคีย์ไม่ได้ (ตรวจสอบว่าบอท/API พอร์ต 14120 ออนไลน์อยู่หรือไม่)")
+    Notify("BLXCKGOD HUB", "เชื่อมต่อเซิร์ฟเวอร์เช็กคีย์ไม่ได้")
     return
 end
 
@@ -58,12 +72,20 @@ end)
 if not decodeOk or type(data) ~= "table" or data.valid ~= true then
     local reason = (type(data) == "table" and data.message) or "คีย์ไม่ถูกต้องหรือหมดอายุ"
     warn("[BLXCKGOD HUB] ยืนยันคีย์ไม่ผ่าน: " .. tostring(reason))
+    Notify("BLXCKGOD HUB", tostring(reason))
     return
 end
 
-print("[BLXCKGOD HUB] ยืนยันคีย์สำเร็จ! ผู้ใช้ Discord:", tostring(data.discordTag), "| แพ็กเกจ:", tostring(data.plan))
+print("[BLXCKGOD HUB] ยืนยันคีย์สำเร็จ! ผู้ใช้:", tostring(data.discordTag), "| แพ็กเกจ:", tostring(data.plan))
+Notify("BLXCKGOD HUB", "ยืนยันคีย์สำเร็จ (" .. tostring(data.plan) .. ")")
 
--- ================= วางโค้ดหลัก (WindUI / BLXCKGOD HUB) ต่อจากบรรทัดนี้ได้เลย =================
+-- 2. โค้ดหลักจะรันได้เฉพาะเมื่อผ่านการตรวจคีย์ด้านบนมาแล้วเท่านั้น
+local function runMainHub()
+    -- ================= วางโค้ดหลัก (WindUI / BLXCKGOD HUB) ต่อจากบรรทัดนี้ =================
+
+end
+
+runMainHub()
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 local Window = WindUI:CreateWindow({
     Title = "BLXCKGOD HUB",
