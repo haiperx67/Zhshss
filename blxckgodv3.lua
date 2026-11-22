@@ -1,3 +1,69 @@
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- ใส่ลิงก์ API ของบอทคุณตรงนี้
+local API_URL = "http://ใส่_IP_หรือโดเมนบอทของคุณ:3000/verify"
+
+local HttpRequest =
+    (syn and syn.request)
+    or (http and http.request)
+    or (typeof(request) == "function" and request)
+    or (typeof(http_request) == "function" and http_request)
+
+local function GetHWID()
+    local ok, id = pcall(function()
+        if typeof(gethwid) == "function" then
+            return gethwid()
+        end
+        return game:GetService("RbxAnalyticsService"):GetClientId()
+    end)
+    return ok and tostring(id) or tostring(LocalPlayer.UserId)
+end
+
+-- อ่านคีย์จาก getgenv().BLXCKGOD_KEY ที่ลูกค้าใส่มาตอนรัน
+local userKey = tostring(getgenv().BLXCKGOD_KEY or ""):gsub("%s+", ""):upper()
+
+if userKey == "" then
+    warn("[BLXCKGOD HUB] ไม่พบคีย์! กรุณาใส่ getgenv().BLXCKGOD_KEY = \"คีย์ของคุณ\" ก่อนรัน")
+    return
+end
+
+if not HttpRequest then
+    warn("[BLXCKGOD HUB] Executor ของคุณไม่รองรับ HTTP Request")
+    return
+end
+
+local url = string.format(
+    "%s?key=%s&hwid=%s&user=%s",
+    API_URL,
+    HttpService:UrlEncode(userKey),
+    HttpService:UrlEncode(GetHWID()),
+    HttpService:UrlEncode(LocalPlayer.Name)
+)
+
+local ok, response = pcall(function()
+    return HttpRequest({ Url = url, Method = "GET" })
+end)
+
+if not ok or not response or not response.Body then
+    warn("[BLXCKGOD HUB] ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์เช็กคีย์ได้")
+    return
+end
+
+local decodeOk, data = pcall(function()
+    return HttpService:JSONDecode(response.Body)
+end)
+
+if not decodeOk or type(data) ~= "table" or data.valid ~= true then
+    local reason = (type(data) == "table" and data.message) or "คีย์ไม่ถูกต้องหรือหมดอายุ"
+    warn("[BLXCKGOD HUB] ยืนยันคีย์ไม่ผ่าน: " .. tostring(reason))
+    return
+end
+
+print("[BLXCKGOD HUB] ยืนยันคีย์สำเร็จ! ผู้ใช้ Discord:", tostring(data.discordTag), "| แพ็กเกจ:", tostring(data.plan))
+
+-- ================= วางโค้ดหลัก (WindUI / BLXCKGOD HUB) ต่อจากบรรทัดนี้ได้เลย =================
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 local Window = WindUI:CreateWindow({
     Title = "BLXCKGOD HUB",
